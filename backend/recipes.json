@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Tomato Pasta",
+    "ingredients": ["pasta", "tomato", "salt", "oil"]
+  },
+  {
+    "name": "Veg Salad",
+    "ingredients": ["lettuce", "tomato", "cucumber", "salt"]
+  },
+  {
+    "name": "Omelette",
+    "ingredients": ["egg", "salt", "oil"]
+  }
+]

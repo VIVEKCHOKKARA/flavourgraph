@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FlavorGraph - Recipe Finder</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <h1>FlavorGraph 🍲</h1>
+    <p class="tagline">Find recipes from your available ingredients</p>
+
+    <form id="ingredientForm">
+      <input type="text" id="ingredients" placeholder="Enter ingredients (comma separated)" required />
+      <button type="submit">Find Recipes</button>
+    </form>
+
+    <div id="results" class="results"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById("ingredientForm");
+    const resultsDiv = document.getElementById("results");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      resultsDiv.innerHTML = "<p>Loading...</p>";
+
+      const ingredients = document.getElementById("ingredients").value.split(",").map(i => i.trim());
+
+      try {
+        const response = await fetch("http://localhost:8000/suggest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ available: ingredients })
+        });
+
+        if (!response.ok) {
+          resultsDiv.innerHTML = "<p class='error'>Error fetching recipes</p>";
+          return;
+        }
+
+        const data = await response.json();
+        displayResults(data);
+      } catch (err) {
+        resultsDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+      }
+    });
+
+    function displayResults(data) {
+      resultsDiv.innerHTML = "";
+
+      if (!data.recipes || data.recipes.length === 0) {
+        resultsDiv.innerHTML = "<p>No recipes found</p>";
+        return;
+      }
+
+      data.recipes.forEach(recipe => {
+        const div = document.createElement("div");
+        div.classList.add("recipe");
+
+        div.innerHTML = `
+          <h3>${recipe.name}</h3>
+          <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
+          <p><strong>Missing:</strong> ${recipe.missing.length > 0 ? recipe.missing.join(", ") : "None 🎉"}</p>
+          <p><strong>Substitutions:</strong> ${Object.keys(recipe.substitutions).length > 0 ? JSON.stringify(recipe.substitutions) : "None"}</p>
+        `;
+
+        resultsDiv.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
